@@ -4,6 +4,8 @@ import HeroCarousel from './components/HeroCarousel';
 import MovieRow from './components/MovieRow';
 import SearchResults from './components/SearchResults';
 import { heroSlides, popularSeries, popularMovies, topRated, type Movie } from './data/movies';
+import { useAuth } from './lib/auth';
+import SignIn from './components/SignIn';
 
 type NavPage = 'home' | 'tvshow' | 'movie' | 'animation' | 'most-watched';
 
@@ -22,10 +24,13 @@ const secondaryItems = [
 ];
 
 export default function App() {
+  const { user, loading, signOut } = useAuth();
+
   const [activePage, setActivePage] = useState<NavPage>('home');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   const allMovies = useMemo<Movie[]>(() => {
@@ -54,6 +59,18 @@ export default function App() {
     setSearchOpen(false);
     setSearchQuery('');
   };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0E0E12', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <PIcon name="refresh" theme="dark" size="large" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <SignIn />;
+  }
 
   return (
     <PCanvas
@@ -171,18 +188,87 @@ export default function App() {
         </PButtonPure>
         <div
           style={{
-            width: 32,
-            height: 32,
-            background: '#10b981',
-            borderRadius: '50%',
-            display: searchOpen ? 'none' : 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
+            position: 'relative',
             flexShrink: 0,
           }}
         >
-          <PIcon name="user" theme="dark" size="small" />
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            title={user.email}
+            style={{
+              width: 32,
+              height: 32,
+              background: '#10b981',
+              borderRadius: '50%',
+              border: 'none',
+              display: searchOpen ? 'none' : 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <PIcon name="user" theme="dark" size="small" />
+          </button>
+          {menuOpen && (
+            <>
+              <div
+                onClick={() => setMenuOpen(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 998 }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: 8,
+                  background: '#1a1a20',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: 8,
+                  padding: '8px',
+                  zIndex: 999,
+                  minWidth: 200,
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                }}
+              >
+                <div
+                  style={{
+                    padding: '8px 12px',
+                    borderBottom: '1px solid rgba(255,255,255,0.08)',
+                    marginBottom: 4,
+                  }}
+                >
+                  <PText theme="dark" size="x-small" color="contrast-medium">
+                    {user.email}
+                  </PText>
+                </div>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    signOut();
+                  }}
+                  style={{
+                    width: '100%',
+                    background: 'transparent',
+                    border: 'none',
+                    padding: '8px 12px',
+                    color: '#FBFCFF',
+                    fontFamily: "'Porsche Next','Arial Narrow',Arial,sans-serif",
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    borderRadius: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <PIcon name="logout" theme="dark" size="x-small" />
+                  Sign Out
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
