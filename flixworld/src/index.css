@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+@import '@porsche-design-system/components-react/tailwindcss';
+
+@theme {
+  --breakpoint-xs: 30rem; /* 480px, extra breakpoint for small phones */
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #0E0E12;
+}
