@@ -2,11 +2,8 @@ import { useState } from 'react';
 import { PText, PButtonPure, PIcon } from '@porsche-design-system/components-react';
 import { useAuth } from '../lib/auth';
 
-type Mode = 'signin' | 'signup';
-
 export default function SignIn() {
-  const { signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<Mode>('signin');
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -16,21 +13,9 @@ export default function SignIn() {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
-
-    const result = mode === 'signin'
-      ? await signIn(email, password)
-      : await signUp(email, password);
-
+    const result = await signIn(email, password);
     setSubmitting(false);
-
-    if (result.error) {
-      setError(result.error);
-    }
-  };
-
-  const switchMode = () => {
-    setMode(mode === 'signin' ? 'signup' : 'signin');
-    setError(null);
+    if (result.error) setError(result.error);
   };
 
   return (
@@ -81,7 +66,7 @@ export default function SignIn() {
             FlixWorld
           </span>
           <PText theme="dark" size="small" color="contrast-medium" style={{ marginTop: 4 }}>
-            {mode === 'signin' ? 'Welcome back' : 'Create your account'}
+            Welcome back
           </PText>
         </div>
 
@@ -177,30 +162,9 @@ export default function SignIn() {
             disabled={submitting}
             style={{ width: '100%', marginTop: 4 }}
           >
-            {submitting ? 'Please wait...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
+            {submitting ? 'Please wait...' : 'Sign In'}
           </PButtonPure>
         </form>
-
-        <div style={{ textAlign: 'center', marginTop: 24 }}>
-          <PText theme="dark" size="x-small" color="contrast-medium">
-            {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-          </PText>
-          <button
-            onClick={switchMode}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#10b981',
-              fontFamily: "'Porsche Next','Arial Narrow',Arial,sans-serif",
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              textDecoration: 'underline',
-            }}
-          >
-            {mode === 'signin' ? 'Sign up' : 'Sign in'}
-          </button>
-        </div>
       </div>
     </div>
   );
